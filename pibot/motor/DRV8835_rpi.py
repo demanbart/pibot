@@ -1,4 +1,4 @@
-import wiringpi2
+import wiringpi as wiringpi2
 import motor
 
 # Motor speeds for this library are specified as numbers
