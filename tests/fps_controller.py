@@ -1,21 +1,64 @@
 import pibot.control.fps as mycontroller
 import pygame
+import socket
 
 controller = mycontroller.Fps()
+HOST = '192.168.0.135'  # The server's hostname or IP address
+PORT = 50101        # The port used by the server
 
 for command in controller.control():
     print(command)
-    #zdsq to drive motor 1 and motor 2
-    x = command["zdsq"]["x"]
-    y = command["zdsq"]["y"]
-    
-    if x > 0:
-        m1 = y
-        m2 = int((y - abs(x))*480/1000)
-    else:
-        m2 = y
-        m1 = int((y - abs(x))*480/1000)
-        
-   # motorset.execute({"motor1": m1, "motor2": m2})
+    if "zdsq" in command:
+        #zdsq to drive motor 1 and motor 2
+        x = command["zdsq"]["x"]
+        y = command["zdsq"]["y"]
+
+        #straight
+        if [x,y] == [0,1]:
+            right = 480
+            left = 480
+        #back
+        elif [x,y] == [0,-1]:
+            right = -480
+            left = -480
+        #pivot right
+        elif [x,y] == [1,0]:
+            right = -480
+            left = 480
+        #pivot left
+        elif [x,y] == [-1,0]:
+            right = 480
+            left = -480
+        #turn right
+        elif [x,y] == [1,1]:
+            right = 240
+            left = 480
+        #turn left
+        elif [x,y] == [-1,1]:
+            right = 480
+            left = 240
+        #backward left
+        elif [x,y] == [-1,-1]:
+            right = -480
+            left = -240
+        #backward right
+        elif [x,y] == [1,-1]:
+            right = -240
+            left = -480
+        #stop
+        else:
+            right = 0
+            left = 0
+
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.connect((HOST, PORT))
+                command = "{'motor1':"+str(right)+", 'motor2':"+str(left)+"}"
+                s.sendall(bytearray(command,"utf-8"))
+                
+        except ConnectionRefusedError:
+            print("Could not reach robot")
+    elif "mouse" in command:
+        pass
 
     
