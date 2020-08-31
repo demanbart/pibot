@@ -5,7 +5,7 @@ setup(name='pibot',
       description='Python robot development tools',
       author='Bart Deman',
       author_email='b.deman@dbcon.be',
-      url='https://www.python.org/sigs/distutils-sig/',
+      url='https://github.com/demanbart/pibot',
       packages=['pibot', 'pibot.communicate', 'pibot.control', 'pibot.motor'],
 	  requires=['pygame','sys','time'],
      )
