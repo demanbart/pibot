@@ -8,7 +8,7 @@ class CameraMount:
 
   def execute(self, command):
     #this is how to send the position to the arduino, see /doc/cameramount for arduinocode
-    values = [int(i) for k, i in command.items()]
+    values = [int(i) for i in command]
     print(values)
     try:
       self.bus.write_block_data(self.DEVICE_ADDR, 0, values)    

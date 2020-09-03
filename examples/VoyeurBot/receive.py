@@ -24,9 +24,9 @@ try:
                         data = ast.literal_eval(bytedata.decode("utf-8"))
                         print(data)
                         if("motor" in data):
-                            motorset.execute(data)
+                            motorset.execute(data["motor"])
                         elif("mouse" in data):
-                            cameramount.execute(data)
+                            cameramount.execute(data["mouse"])
 except Exception as e:
     print(e)
 finally:
