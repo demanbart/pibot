@@ -2,11 +2,11 @@ import smbus2 as smbus
 
 class CameraMount:
   def __init__(self):
-    MAXVALUE = 180
-    MINVALUE = 0
-    DEVICE_BUS = 1
-    DEVICE_ADDR = 0x04
-    bus = smbus.SMBus(DEVICE_BUS)
+    self.MAXVALUE = 180
+    self.MINVALUE = 0
+    self.DEVICE_BUS = 1
+    self.DEVICE_ADDR = 0x04
+    self.bus = smbus.SMBus(DEVICE_BUS)
 
   def execute(self, command):
     #this is how to send the position to the arduino, see /doc/cameramount for arduinocode
