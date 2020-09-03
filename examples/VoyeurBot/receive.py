@@ -1,4 +1,5 @@
 import pibot.motor.DRV8835_rpi
+import pibot.motor.microArduinoI2CServoController
 import socket
 import ast
 
@@ -6,7 +7,7 @@ host = '192.168.0.135'
 port = 50101
 
 motorset = pibot.motor.DRV8835_rpi.DRV8835()
-cameramount = pibot.motor.cameramount.CameraMount()
+cameramount = pibot.motor.microArduinoI2CServoController.CameraMount()
 
 try:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -21,8 +22,10 @@ try:
                         break
                     else:
                         print(data)
-                        motorset.execute(ast.literal_eval(data.decode("utf-8")))
-                        cameramount.execute(ast.literal_eval(data.decode("utf-8")))
+                        if("motor" in data):
+                            motorset.execute(ast.literal_eval(data.decode("utf-8")))
+                        elif("mouse" in data):
+                            cameramount.execute(ast.literal_eval(data.decode("utf-8")))
 except Exception as e:
     print(e)
 finally:

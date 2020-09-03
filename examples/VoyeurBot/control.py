@@ -53,15 +53,16 @@ for command in controller.control():
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 s.connect((HOST, PORT))
-                command = "{'motor1':"+str(right)+", 'motor2':"+str(left)+"}"
+                command = "{'motor':["+str(right)+", "+str(left)+"]}"
                 s.sendall(bytearray(command,"utf-8"))
                 
         except ConnectionRefusedError:
             print("Could not reach robot")
     elif "mouse" in command:
+        print(command)
         x = command["mouse"]["x"]*90+90
         y = command["mouse"]["y"]*90+90
-        command = "{'horizontal':"+str(x)+", 'vertical':"+str(y)+"}"
+        command = "{'mouse':["+str(int(x))+","+str(int(y))+"]}"
         print(command)
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
