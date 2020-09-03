@@ -17,15 +17,16 @@ try:
             conn, addr = s.accept()
             with conn:
                 while True:
-                    data = conn.recv(1024)
+                    bytedata = conn.recv(1024)
                     if not data:
                         break
                     else:
+                        data = ast.literal_eval(bytedata.decode("utf-8")
                         print(data)
                         if("motor" in data):
-                            motorset.execute(ast.literal_eval(data.decode("utf-8")))
+                            motorset.execute(data)
                         elif("mouse" in data):
-                            cameramount.execute(ast.literal_eval(data.decode("utf-8")))
+                            cameramount.execute(data)
 except Exception as e:
     print(e)
 finally:
