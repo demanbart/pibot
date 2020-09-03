@@ -8,8 +8,8 @@ class CameraMount:
 
   def execute(self, command):
     #this is how to send the position to the arduino, see /doc/cameramount for arduinocode
+    values = [i for k, i in command.items()]
     try:
-      values = [max([0, min([i,180])]) for k, i in command.items()]
       self.bus.write_block_data(self.DEVICE_ADDR, 0, values)    
     except Exception as e:
       print(e)
