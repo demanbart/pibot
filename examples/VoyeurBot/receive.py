@@ -18,10 +18,10 @@ try:
             with conn:
                 while True:
                     bytedata = conn.recv(1024)
-                    if not data:
+                    if not bytedata:
                         break
                     else:
-                        data = ast.literal_eval(bytedata.decode("utf-8")
+                        data = ast.literal_eval(bytedata.decode("utf-8"))
                         print(data)
                         if("motor" in data):
                             motorset.execute(data)
