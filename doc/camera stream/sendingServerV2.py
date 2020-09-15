@@ -1,26 +1,12 @@
+import cv2
 import numpy as np
 import socket
 import sys
 import pickle
 import struct
-import ast
-import smbus2 as smbus
-import picamera
-import time
 
-host = '192.168.0.135'
-port = 50101
-
-values = [0,0,0,0]
-
-arduinoDeviceBus = 1
-arduinoDeviceAddr = 0x04
-arduinoBus = smbus.SMBus(self.DEVICE_BUS)
-
-camera = picamera.PiCamera()
-camera.resolution = (320, 240)
-camera.framerate = 24
-time.sleep(2)
+HOST = 'localhost'
+PORT = 50101
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print('Socket created')
@@ -78,10 +64,9 @@ while True:
         
         print("send image")
         #send frame
-        output = np.empty((240, 320, 3), dtype=np.uint8)
-        camera.capture(output, 'rgb')
+        ret,frame=cap.read()
         # Serialize frame
-        data = pickle.dumps(output)
+        data = pickle.dumps(frame)
 
         # Send message length first
         message_size = struct.pack("L", len(data))
