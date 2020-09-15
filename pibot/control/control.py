@@ -32,8 +32,7 @@ class Controller:
 
     def drawDirectionalGauge(self, direction):
         """ creates a directionindicator, needs tuple (x,y) as coördinates"""
-        pygame.draw.circle(self.windowSurface,self.colorpallet["tranparant"] , (55, 55), 50, 5)
-        pygame.draw.circle(self.windowSurface, self.colorpallet["red"], (direction[0]+55, -direction[1]+55), 5)
+        pass
 
     def drawCameraView(self):
 	    pygame.draw.circle(self.windowSurface,self.colorpallet["tranparant"] , self.windowCenter, 110, 5)
@@ -41,7 +40,6 @@ class Controller:
 
     def decorateMouse(self):
         pygame.mouse.set_cursor(*pygame.cursors.broken_x)
-        
 
     def drawController(self, directionalGauge = [0, 0]):
         if not pygame.get_init():

@@ -1,12 +1,30 @@
 import pibot.control.control
 import pygame
+import pickle
+import socket
+import struct
+import cv2
 
 class Fps(pibot.control.control.Controller):
     """this controller is using the keyboard and mouse fps style"""    
-    def __init__(self):
+    def __init__(self, cameraServer=None, cameraPort=None):
         self.drawController()
         pygame.event.set_blocked(None)
         pygame.event.set_allowed([pygame.KEYDOWN, pygame.KEYUP, pygame.QUIT, pygame.MOUSEMOTION])
+        self.cameraServer = cameraServer
+        self.cameraPort = cameraPort
+        self.cameraConnection = None
+
+    def openCameraConnection():
+        if not self.cameraConnection:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            print('Socket created')
+
+            s.bind((HOST, PORT))
+            print('Socket bind complete')
+            s.listen(10)
+            print('Socket now listening')
+            
         
     def control(self):
         while True:
@@ -54,5 +72,7 @@ class Fps(pibot.control.control.Controller):
                     x = (mousepos[0]-self.windowSize[0]/2)/(self.windowSize[0]/2)
                     y = -(mousepos[1]-self.windowSize[1]/2)/(self.windowSize[1]/2)
                     yield({"mouse":{"x": x, "y": y}})
-				
+            
+	if(cameraServer):
+            
 		    

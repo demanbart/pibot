@@ -1,5 +1,4 @@
 import wiringpi as wiringpi2
-import pibot.motor.motor
 
 # Motor speeds for this library are specified as numbers
 # between -MAX_SPEED and MAX_SPEED, inclusive.
@@ -56,20 +55,5 @@ class DRV8835RpiMotors(object):
     def setSpeeds(self, m1_speed, m2_speed):
         self.motor1.setSpeed(m1_speed)
         self.motor2.setSpeed(m2_speed)
-
-class DRV8835(pibot.motor.motor.Motor):
-    def __init__(self):
-         self.__driverName = "DRV8835"
-         self.__driverBrand = "Pololu"
-         self.__driverDescription = "Dual motordriver kit for Raspberry Pi B+, DRV8835 dual H-bridge motor driver IC, Continuous output current per channel: 1.2A, PWM frequency: 250 kHz (maximum) ,The DRV8835 Dual Motor Driver Kit for Raspberry Pi B+ provides an easy and low-cost solution for driving a pair of small brushed DC motors with a Raspberry Pi Model B+. The expansion board features Texas Instruments' DRV8835 dual H-bridge motor driver IC."
-         self.__driverUrl = "https://www.pololu.com/product/2753"
-         self.__commandStructure = {"motor1": "int:0-248", "motor2": "int:0-248"}
-         self.motors = DRV8835RpiMotors()
-     
-    
-    def execute(self,command):
-        #check if given command complies with the commandstructure before sending"
-        if self.validate_command_structure(command, self.__commandStructure):
-            self.motors.setSpeeds(command["motor1"], command["motor2"])
 
 
