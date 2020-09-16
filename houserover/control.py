@@ -7,7 +7,7 @@ import sys
 import numpy as np
 
 #the main code
-guiWindowSize = (320,240)
+guiWindowSize = (1280,720)
 guiColorPallet = {
             "white": pygame.Color(255,255,255),
             "grey": pygame.Color(100,100,100),
@@ -15,7 +15,7 @@ guiColorPallet = {
             "tranparant": pygame.Color(240,240,240,100)
         }
 
-host = 'localhost'
+host = '192.168.0.135'
 port = 50101
 cameraConnection = None
 robotConnection = None
@@ -28,8 +28,8 @@ while True:
         guiDisplay = pygame.display.set_mode(guiWindowSize)
         guiWindowSurface = pygame.display.get_surface()
         guiWindowSurface.fill(guiColorPallet["white"])
-        x = np.arange(0, 300)
-        y = np.arange(0, 300)
+        x = np.arange(0, 1280)
+        y = np.arange(0, 720)
         X, Y = np.meshgrid(x, y)
         Z = X + Y
         Z = 255*Z/Z.max()
@@ -96,17 +96,16 @@ while True:
     try:
         if not robotConnection:
             robotConnection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            robotConnection.settimeout(10)
+            robotConnection.settimeout(5)
             robotConnection.connect((host, port))
-
-        print("send command: "+str(command))
-        robotConnection.sendall(struct.pack("L",len(command))+bytearray(str(command),"utf-8"))
-
-        #reveive camera image
-        data = b''
-        payload_size = struct.calcsize("L")
-        print("receive camera ")
         try:
+            print("send command: "+str(command))
+            robotConnection.sendall(struct.pack("L",len(command))+bytearray(str(command),"utf-8"))
+
+            #reveive camera image
+            data = b''
+            payload_size = struct.calcsize("L")
+            print("receive camera ")
             # Retrieve message size
             while len(data) < payload_size:
                 data += robotConnection.recv(4096)
@@ -124,13 +123,10 @@ while True:
 
             # Extract frame
             frame = pickle.loads(frame_data)
-            guiImageSurface = pygame.surfarray.make_surface(frame)
+            guiImageSurface = pygame.transform.rotate(pygame.surfarray.make_surface(frame),180)
         except socket.timeout:
             print("timed out waiting for image")
-    except ConnectionRefusedError:
-        print("Could not reach robot")
-        robotConnection = None
-    except ConnectionResetError:
+    except (ConnectionResetError, OSError, ConnectionAbortedError, ConnectionRefusedError):
         print("Connection was reset on robot side")
         robotConnection = None
             
