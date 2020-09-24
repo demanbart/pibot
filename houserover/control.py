@@ -106,10 +106,11 @@ while True:
             robotConnection.settimeout(5)
             robotConnection.connect((host, port))
         try:
-            #print("send command: "+str(command))
+            if command != {}:
+                print("send command: "+str(command))
             robotConnection.sendall(struct.pack("L",len(command))+bytearray(str(command),"utf-8"))
 
-            #reveive camera image
+            #receive camera image
             data = b''
             payload_size = struct.calcsize("L")
             #print("receive camera ")

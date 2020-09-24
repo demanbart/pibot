@@ -11,7 +11,7 @@ import time
 host = '192.168.0.135'
 port = 50101
 
-values = [90,90,0,0]
+values = [0,0,90,90]
 
 arduinoDeviceBus = 1
 arduinoDeviceAddr = 0x04
@@ -19,7 +19,7 @@ arduinoBus = smbus.SMBus(arduinoDeviceBus)
 
 camera = picamera.PiCamera()
 camera.framerate = 40
-camera.resolution = (736,1280)
+camera.resolution = (240,352)
 camera.rotation = 180
 camera.start_preview()
 camera.vflip = True
@@ -57,12 +57,12 @@ try:
 
             data = ast.literal_eval(data.decode("utf-8"))
             print(data)
-            if("motor" in data):
-                values[0] = data["motor"]["right"]
-                values[1] = data["motor"]["left"]
+            if("direction" in data):
+                values[0] = sorted([0, data["direction"]["right"], 70])[1]
+                values[1] = sorted([0, data["direction"]["left"], 70])[1]
             elif("camera" in data):
-                values[0] = min([175, data["camera"]["x"]+5])
-                values[1] = min([175, data["camera"]["y"]+5])
+                values[2] = min([175, data["camera"]["x"]])
+                values[3] = min([175, data["camera"]["y"]])
             #this is how to send the position to the arduino, see /doc/cameramount for arduinocode
             print(values)
             try:
@@ -73,12 +73,12 @@ try:
             
             print("send image")
             #send frame
-            output = np.empty((1280, 736, 3), dtype=np.uint8)
+            output = np.empty((352, 240, 3), dtype=np.uint8)
             camera.capture(output, use_video_port=True, format='rgb')
             # Serialize frame
             data = pickle.dumps(output)
 
-            # Send message length first
+            # Send message length firstz
             message_size = struct.pack("L", len(data))
 
             # Then data
@@ -91,5 +91,9 @@ except Exception as e:
 finally:
     connection.close()
         
+
+
+
+
 
 
