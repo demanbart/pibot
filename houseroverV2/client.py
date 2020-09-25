@@ -61,36 +61,36 @@ def controller(frameQueue, commandQueue):
                 pressed_keys = [i for i,v in enumerate(pressedKeys) if v==1 if i in [97, 100, 115, 119]]
                 if pressed_keys == [119]:
                     #forward
-                    right = 480
-                    left = 480
+                    right = 78
+                    left = 80
                 elif pressed_keys == [100,119]:
                     #forward right
-                    right = 240
-                    left = 480
+                    right = 50
+                    left = 80
                 elif pressed_keys == [100]:
                     #right
-                    right = -480
-                    left = 480
+                    right = -80
+                    left = 80
                 elif pressed_keys == [100, 115]:
                     #backward right
-                    right = -240
-                    left = -480
+                    right = -50
+                    left = -80
                 elif pressed_keys == [115]:
                     #backward
-                    right = -480
-                    left = -480
+                    right = -80
+                    left = -80
                 elif pressed_keys == [97, 115]:
                     #backward left
-                    right = -480
-                    left = -240
+                    right = -80
+                    left = -50
                 elif pressed_keys == [97]:
                     #left
-                    right = 480
-                    left = -480
+                    right = 80
+                    left = -50
                 elif pressed_keys == [97, 119]:
                     #forward left
-                    right = 480
-                    left = 240
+                    right = 80
+                    left = 50
                 else:
                     right = 0
                     left = 0
@@ -140,10 +140,11 @@ def sendCommand(host, commandQueue):
 frameQueue = queue.LifoQueue()
 commandQueue = queue.LifoQueue()
 lock = threading.Lock()
-host = 'localhost'
+host = '192.168.43.129'
 picturegetter = threading.Thread(target=getPicture, args=(host,frameQueue,), daemon = True)
 picturegetter.start()
 controller = threading.Thread(target=controller, args=(frameQueue, commandQueue,), daemon = True)
 controller.start()
 commandSender = threading.Thread(target=sendCommand, args=(host, commandQueue,), daemon = True)
 commandSender.start()
+
