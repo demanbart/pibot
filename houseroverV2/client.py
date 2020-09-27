@@ -140,7 +140,7 @@ def sendCommand(host, commandQueue):
 frameQueue = queue.LifoQueue()
 commandQueue = queue.LifoQueue()
 lock = threading.Lock()
-host = '192.168.43.129'
+host = '192.168.0.135'
 picturegetter = threading.Thread(target=getPicture, args=(host,frameQueue,), daemon = True)
 picturegetter.start()
 controller = threading.Thread(target=controller, args=(frameQueue, commandQueue,), daemon = True)

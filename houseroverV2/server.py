@@ -10,6 +10,7 @@ import picamera
 import time
 
 def sendPicture(host):
+    print("start sending pictures")
     camera = picamera.PiCamera()
     camera.framerate = 40
     camera.resolution = (240,352)
@@ -68,8 +69,12 @@ def handleCommand(host):
                 except Exception as e:
                     print(e)
 
-host = 'localhost'
+host = '192.168.0.135'
+print("starting houserover server")
 picturesender = threading.Thread(target=sendPicture, args=(host,), daemon = True)
 picturesender.start()
 commandhandler = threading.Thread(target=handleCommand, args=(host,), daemon = True)
 commandhandler.start()
+while True:
+    time.sleep(5)
+
