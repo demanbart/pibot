@@ -1,18 +1,19 @@
 import threading
 import socket
-import time
+import datetime
 import queue
 import os
 import pygame
 import struct
 import sys
 import pickle
+import tkinter as tk
+import cv2
 
 def getPicture(host, frameQueue):
         port = 50101
         while True:
             try:
-                print("get picture")
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     s.connect((host, port))
                     data = b''
@@ -29,9 +30,7 @@ def getPicture(host, frameQueue):
                     frame_data = data[:msg_size]
                     data = data[msg_size:]
                     frame = pickle.loads(frame_data)
-                    print("putting it in the queue")
                     frameQueue.put(frame)
-                    print("it's in the queue")
             except (ConnectionRefusedError, ConnectionResetError) as e:
                 print("Could not get picture: " + str(e))
 
@@ -39,7 +38,7 @@ def controller(frameQueue, commandQueue):
     os.environ['SDL_VIDEO_CENTERED'] = '1'
     pygame.init()
     pygame.event.set_blocked(None)
-    pygame.event.set_allowed([pygame.KEYDOWN, pygame.KEYUP, pygame.QUIT, pygame.MOUSEMOTION])
+    pygame.event.set_allowed([pygame.KEYDOWN, pygame.KEYUP, pygame.QUIT, pygame.MOUSEBUTTONUP])
     pygame.mouse.set_visible(True)
     display = pygame.display.set_mode((500,300))
     surface = pygame.display.get_surface()
@@ -98,24 +97,27 @@ def controller(frameQueue, commandQueue):
                 command[0] = right
                 command[1] = left
 
-            elif event.type == pygame.MOUSEMOTION:
+            elif event.type == pygame.MOUSEBUTTONUP:
                 if surface.get_rect().collidepoint(pygame.mouse.get_pos()):
-                    mousepos = pygame.mouse.get_pos()
-                    x = int(abs(180-(mousepos[0]/displayWidth*180)))
-                    y = int(mousepos[1]/displayHeight*180)
-                    command[2] = x
-                    command[3] = y
+                    print(event)
+                    if event.button == 1:
+                        mousepos = pygame.mouse.get_pos()
+                        x = int(abs(180-(mousepos[0]/displayWidth*180)))
+                        y = int(mousepos[1]/displayHeight*180)
+                        command[2] = x
+                        command[3] = y
+                    elif event.button == 3:
+                        fileName = f"output/{str(datetime.datetime.now()).translate({ord(i): None for i in '-: .'})}.jpg"
+                        print(fileName)
+                        cv2.imwrite(fileName, frame)
 
             if (command[0:1] != previousCommand[0:1]
                 or abs(command[2]-previousCommand[2]) > 2
                 or abs(command[3]-previousCommand[3]) > 2):
                 commandQueue.put(command)
                 previousCommand = [i for i in command]
-            else:
-                print("it's the same")
 
         if frameQueue.qsize() > 0:
-            print("show picture")
             frame = frameQueue.get()
             image = pygame.surfarray.make_surface(frame)
             if image.get_width() != displayWidth:
@@ -137,10 +139,28 @@ def sendCommand(host, commandQueue):
             except (ConnectionRefusedError, ConnectionResetError) as e:
                 print("Could not send command: " + str(e))
 
+settings = tk.Tk()
+tk.Label(settings, text="server name").grid(row=0)
+tk.Label(settings, text="server IP").grid(row=1)
+
+serverName = tk.Entry(settings)
+serverIP = tk.Entry(settings)
+
+serverName.grid(row=0, column=1)
+serverIP.grid(row=1, column=1)
+
+tk.Button(settings, text='Start', command=settings.quit).grid(row=3, 
+                                                       column=1, 
+                                                       sticky=tk.W, 
+                                                       pady=4)
+
+settings.mainloop()
+
 frameQueue = queue.LifoQueue()
 commandQueue = queue.LifoQueue()
 lock = threading.Lock()
-host = '192.168.0.135'
+host = serverIP.get()
+print(host)
 picturegetter = threading.Thread(target=getPicture, args=(host,frameQueue,), daemon = True)
 picturegetter.start()
 controller = threading.Thread(target=controller, args=(frameQueue, commandQueue,), daemon = True)

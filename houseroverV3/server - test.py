@@ -5,20 +5,13 @@ import sys
 import pickle
 import struct
 import ast
-import smbus2 as smbus
-import picamera
 import time
+import cv2
+import netifaces as ni
 
 def sendPicture(host):
     print("start sending pictures")
-    camera = picamera.PiCamera()
-    camera.framerate = 40
-    camera.resolution = (240,352)
-    camera.rotation = 180
-    camera.start_preview()
-    camera.vflip = True
-    camera.hflip = False
-    time.sleep(2)
+    camera = cv2.VideoCapture(0)
     port = 50101
     print("opening picture connection")
 
@@ -28,17 +21,13 @@ def sendPicture(host):
             s.listen()
             connection, address = s.accept()
             with connection:
-                output = np.empty((352, 240, 3), dtype=np.uint8)
-                camera.capture(output, use_video_port=True, format='rgb')
-                data = pickle.dumps(output)
+                ret,frame=camera.read()
+                data = pickle.dumps(frame)
                 message_size = struct.pack("L", len(data))
                 connection.sendall(message_size + data)
 
 def handleCommand(host):
     port = 50102
-    arduinoDeviceBus = 1
-    arduinoDeviceAddr = 0x04
-    arduinoBus = smbus.SMBus(arduinoDeviceBus)
     print("opening command connection")
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind((host, port))
@@ -65,11 +54,11 @@ def handleCommand(host):
                     ]
                 
                 try:
-                    arduinoBus.write_block_data(arduinoDeviceAddr, 0, values)    
+                    print(values)    
                 except Exception as e:
                     print(e)
 
-host = ni.ifaddresses('wlan0')[ni.AF_INET][0]['addr']
+host = 'localhost'
 print("starting houserover server")
 picturesender = threading.Thread(target=sendPicture, args=(host,), daemon = True)
 picturesender.start()
