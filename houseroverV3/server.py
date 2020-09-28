@@ -8,6 +8,7 @@ import ast
 import smbus2 as smbus
 import picamera
 import time
+import nifaces as ni
 
 def sendPicture(host):
     print("start sending pictures")
@@ -25,14 +26,20 @@ def sendPicture(host):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind((host, port))
         while True:
-            s.listen()
-            connection, address = s.accept()
-            with connection:
-                output = np.empty((352, 240, 3), dtype=np.uint8)
-                camera.capture(output, use_video_port=True, format='rgb')
-                data = pickle.dumps(output)
-                message_size = struct.pack("L", len(data))
-                connection.sendall(message_size + data)
+            try:
+                s.listen()
+                connection, address = s.accept()
+                with connection:
+                    output = np.empty((352, 240, 3), dtype=np.uint8)
+                    camera.capture(output, use_video_port=True, format='rgb')
+                    data = pickle.dumps(output)
+                    message_size = struct.pack("L", len(data))
+                    connection.sendall(message_size + data)
+            except ConnectionResetError as e:
+                print("connection reset by client")
+            finally:
+                if connection:
+                    connection.close()
 
 def handleCommand(host):
     port = 50102

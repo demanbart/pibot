@@ -11,6 +11,7 @@ import tkinter as tk
 import cv2
 
 def getPicture(host, frameQueue):
+        print(f"{datetime.datetime.now()}: starting getPicture thread")
         port = 50101
         while True:
             try:
@@ -31,10 +32,11 @@ def getPicture(host, frameQueue):
                     data = data[msg_size:]
                     frame = pickle.loads(frame_data)
                     frameQueue.put(frame)
-            except (ConnectionRefusedError, ConnectionResetError) as e:
-                print("Could not get picture: " + str(e))
+            except (ConnectionRefusedError, ConnectionResetError, TimeoutError) as e:
+                print(f"{datetime.datetime.now()}: Could not get picture: " + str(e))
 
 def controller(frameQueue, commandQueue):
+    print(f"{datetime.datetime.now()}: starting controller thread")
     os.environ['SDL_VIDEO_CENTERED'] = '1'
     pygame.init()
     pygame.event.set_blocked(None)
@@ -52,7 +54,7 @@ def controller(frameQueue, commandQueue):
         if pygame.event.peek():
             event = pygame.event.poll()
             if event.type == pygame.QUIT:
-                print("You quit")
+                print(f"{datetime.datetime.now()}: You quit")
                 pygame.quit()
                 sys.exit()
             if event.type in [pygame.KEYDOWN, pygame.KEYUP]:
@@ -99,17 +101,16 @@ def controller(frameQueue, commandQueue):
 
             elif event.type == pygame.MOUSEBUTTONUP:
                 if surface.get_rect().collidepoint(pygame.mouse.get_pos()):
-                    print(event)
                     if event.button == 1:
                         mousepos = pygame.mouse.get_pos()
                         x = int(abs(180-(mousepos[0]/displayWidth*180)))
                         y = int(mousepos[1]/displayHeight*180)
                         command[2] = x
                         command[3] = y
-                    elif event.button == 3:
+                    elif event.button == 3 and frame:
                         fileName = f"output/{str(datetime.datetime.now()).translate({ord(i): None for i in '-: .'})}.jpg"
-                        print(fileName)
-                        cv2.imwrite(fileName, frame)
+                        cv2.imwrite(fileName, cv2.rotate(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB),cv2.ROTATE_90_CLOCKWISE))
+                        print(f"{datetime.datetime.now()}: exported image to {fileName}")
 
             if (command[0:1] != previousCommand[0:1]
                 or abs(command[2]-previousCommand[2]) > 2
@@ -121,6 +122,7 @@ def controller(frameQueue, commandQueue):
             frame = frameQueue.get()
             image = pygame.surfarray.make_surface(frame)
             if image.get_width() != displayWidth:
+                print(f"{datetime.datetime.now()}: first image received, setting display")
                 display = pygame.display.set_mode((image.get_width(), image.get_height()))
                 displayWidth = surface.get_width()
                 displayHeight = surface.get_height()
@@ -136,8 +138,8 @@ def sendCommand(host, commandQueue):
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                         s.connect((host, port))
                         s.sendall(struct.pack("L",len(command))+bytearray(str(command),"utf-8"))
-            except (ConnectionRefusedError, ConnectionResetError) as e:
-                print("Could not send command: " + str(e))
+            except (ConnectionRefusedError, ConnectionResetError, TimeoutError) as e:
+                print(f"{datetime.datetime.now()}: Could not send command: " + str(e))
 
 settings = tk.Tk()
 tk.Label(settings, text="server name").grid(row=0)
